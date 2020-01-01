@@ -97,7 +97,7 @@ public class ConfiguracionUI extends JDialog {
 
     private void seleccionarRuta() {
         JFileChooser fc = new JFileChooser();
-        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
         int retorno = fc.showSaveDialog(this);
         if (retorno == JFileChooser.APPROVE_OPTION) {
             File directorio = fc.getSelectedFile();

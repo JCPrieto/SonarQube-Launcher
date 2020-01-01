@@ -93,6 +93,7 @@ public class AcercaDe extends JDialog {
         cns.gridy = yPosition++;
         panel.add(jLabelPoweredBy, cns);
         addPowered(panel, cns, yPosition++, "SonarQube", "https://www.sonarqube.org");
+        addPowered(panel, cns, yPosition++, "Papirus", "https://github.com/PapirusDevelopmentTeam/papirus-icon-theme");
         addPowered(panel, cns, yPosition++, "Jackson", "https://github.com/FasterXML/jackson-core/wiki");
         addPowered(panel, cns, yPosition++, "Firebase", "https://firebase.google.com");
         addPowered(panel, cns, yPosition++, "Apache Commons Lang", "http://commons.apache.org/proper/commons-lang");
