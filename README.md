@@ -10,7 +10,7 @@ Lanzador para SonarQube en sistemas Linux si no quieres arrancar el servidor com
 
 ### Ejecución ###
 
-* Ejecutar 'SonarQube Launcher.sh' dentro del directorio bin
+* Ejecutar 'SonarQube-Launcher.sh' dentro del directorio bin
 
 ### Tecnologías utilizadas ###
 
