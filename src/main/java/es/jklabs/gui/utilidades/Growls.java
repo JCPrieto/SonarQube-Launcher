@@ -37,7 +37,7 @@ public class Growls {
         mostrarInfo(null, cuerpo);
     }
 
-    private static void mostrarInfo(String titulo, String cuerpo) {
+    public static void mostrarInfo(String titulo, String cuerpo) {
         if (trayIcon != null) {
             trayIcon.displayMessage(titulo != null ? Mensajes.getMensaje(titulo) : null, Mensajes.getMensaje(cuerpo), TrayIcon.MessageType.INFO);
         } else {

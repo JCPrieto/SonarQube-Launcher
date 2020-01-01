@@ -8,16 +8,21 @@ import es.jklabs.utilidades.Constantes;
 import es.jklabs.utilidades.Logger;
 import es.jklabs.utilidades.Mensajes;
 import es.jklabs.utilidades.UtilidadesFirebase;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Objects;
 
 public class MainUI extends JFrame {
 
+    public static final String CAMBIAR_ESTADO_SONAR = "cambiar.estado.sonar";
     private Configuracion configuracion;
     private JPanel panelCentral;
+    private JToggleButton btnSonar;
 
     public MainUI(Configuracion configuracion) {
         this();
@@ -31,7 +36,6 @@ public class MainUI extends JFrame {
         super.setIconImage(new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource
                 ("img/icons/sonarqube.png"))).getImage());
         super.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(500, 500));
         cargarMenu();
     }
 
@@ -42,8 +46,73 @@ public class MainUI extends JFrame {
     }
 
     private void cargarPanelCentral() {
-        //ToDo
-        panelCentral = new JPanel();
+        if (obtenerEstadoSonarQube()) {
+            btnSonar = new JToggleButton(Mensajes.getMensaje("estado.sonar.running"), new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource
+                    ("img/estados/ok.png"))), true);
+        } else {
+            btnSonar = new JToggleButton(Mensajes.getMensaje("estado.sonar.stopped"), new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource
+                    ("img/estados/ko.png"))), false);
+        }
+        btnSonar.setHorizontalTextPosition(SwingConstants.LEFT);
+        btnSonar.addActionListener(l -> cambioEstado());
+        panelCentral = new JPanel(new BorderLayout());
+        panelCentral.add(btnSonar, BorderLayout.CENTER);
+    }
+
+    private boolean obtenerEstadoSonarQube() {
+        boolean retorno = false;
+        try {
+            Process p = Runtime.getRuntime().exec(configuracion.getPath() + " status");
+            BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            String linea = stdInput.readLine();
+            if (!StringUtils.isEmpty(linea) && linea.contains("SonarQube is running")) {
+                retorno = true;
+            }
+            if (!retorno) {
+                tratarErrorEjecucion(stdError, "obtener.estado.sonar");
+            }
+        } catch (IOException e) {
+            Growls.mostrarError(Mensajes.getError("obtener.estado.sonar"), e);
+        }
+        return retorno;
+    }
+
+    private void cambioEstado() {
+        try {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            if (obtenerEstadoSonarQube()) {
+                Process p = Runtime.getRuntime().exec(configuracion.getPath() + " stop");
+                cambioEstado(p, "Started SonarQube");
+            } else {
+                Process p = Runtime.getRuntime().exec(configuracion.getPath() + " start");
+                cambioEstado(p, "Stopped SonarQube");
+            }
+        } catch (IOException e) {
+            Growls.mostrarError(Mensajes.getError(CAMBIAR_ESTADO_SONAR), e);
+        } finally {
+            this.setCursor(null);
+        }
+        actualizarPanelCentral();
+    }
+
+    private void cambioEstado(Process p, String s) throws IOException {
+        BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+        String linea;
+        while ((linea = stdInput.readLine()) != null && linea.contains(s)) ;
+        tratarErrorEjecucion(stdError, CAMBIAR_ESTADO_SONAR);
+    }
+
+    private void tratarErrorEjecucion(BufferedReader stdError, String accion) throws IOException {
+        String linea;
+        StringBuilder salida = new StringBuilder(StringUtils.EMPTY);
+        while ((linea = stdError.readLine()) != null) {
+            salida.append(linea);
+        }
+        if (!StringUtils.isEmpty(salida)) {
+            Growls.mostrarInfo(Mensajes.getError(accion), salida.toString());
+        }
     }
 
     private void cargarMenu() {
@@ -72,8 +141,11 @@ public class MainUI extends JFrame {
                 jmActualizacion.addActionListener(al -> descargarNuevaVersion());
                 menu.add(jmActualizacion);
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             Logger.error("consultar.nueva.version", e);
+        } catch (InterruptedException e) {
+            Logger.error("consultar.nueva.version", e);
+            Thread.currentThread().interrupt();
         }
         super.setJMenuBar(menu);
     }
@@ -98,6 +170,17 @@ public class MainUI extends JFrame {
     }
 
     public void actualizarPanelCentral() {
-
+        if (obtenerEstadoSonarQube()) {
+            btnSonar.setText(Mensajes.getMensaje("estado.sonar.running"));
+            btnSonar.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource
+                    ("img/estados/ok.png"))));
+            btnSonar.setSelected(true);
+        } else {
+            btnSonar.setText(Mensajes.getMensaje("estado.sonar.stopped"));
+            btnSonar.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource
+                    ("img/estados/ko.png"))));
+            btnSonar.setSelected(false);
+        }
+        this.pack();
     }
 }
