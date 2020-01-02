@@ -27,6 +27,10 @@ Lanzador para SonarQube en sistemas Linux si no quieres arrancar el servidor com
 
 ### Changelog ###
 
+* 0.0.2
+
+    * Corrección de un mensaje de error en la primera ejecución, cuando aún no se ha indicado la ruta de SonarQube.
+
 * 0.0.1
 
     * Primera versión funcional de la aplicación

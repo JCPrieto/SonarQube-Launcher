@@ -61,19 +61,21 @@ public class MainUI extends JFrame {
 
     private boolean obtenerEstadoSonarQube() {
         boolean retorno = false;
-        try {
-            Process p = Runtime.getRuntime().exec(configuracion.getPath() + " status");
-            BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-            String linea = stdInput.readLine();
-            if (!StringUtils.isEmpty(linea) && linea.contains("SonarQube is running")) {
-                retorno = true;
+        if (!StringUtils.isEmpty(configuracion.getPath())) {
+            try {
+                Process p = Runtime.getRuntime().exec(configuracion.getPath() + " status");
+                BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+                String linea = stdInput.readLine();
+                if (!StringUtils.isEmpty(linea) && linea.contains("SonarQube is running")) {
+                    retorno = true;
+                }
+                if (!retorno) {
+                    tratarErrorEjecucion(stdError, "obtener.estado.sonar");
+                }
+            } catch (IOException e) {
+                Growls.mostrarError(Mensajes.getError("obtener.estado.sonar"), e);
             }
-            if (!retorno) {
-                tratarErrorEjecucion(stdError, "obtener.estado.sonar");
-            }
-        } catch (IOException e) {
-            Growls.mostrarError(Mensajes.getError("obtener.estado.sonar"), e);
         }
         return retorno;
     }
