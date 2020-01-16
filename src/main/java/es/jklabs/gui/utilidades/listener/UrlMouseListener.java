@@ -31,12 +31,12 @@ public class UrlMouseListener implements MouseListener {
 
     @Override
     public void mousePressed(MouseEvent mouseEvent) {
-
+        //
     }
 
     @Override
     public void mouseReleased(MouseEvent mouseEvent) {
-
+        //
     }
 
     @Override
